@@ -10,20 +10,26 @@ interface coordinate {
   x: number;
   y: number;
 }
-const initialsnake = [
+const INITIAL_SNAKE = [
   { x: 33, y: 50 },
   { x: 32, y: 50 },
   { x: 31, y: 50 },
   { x: 30, y: 50 },
 ];
-let snake: coordinate[] = initialsnake;
+const TICK_LENGTH_MS = 17;
+const INITIAL_SNAKE_LENGTH = 6;
+const MAX_NUMBER_APPLES = 3;
+
+let mvmntDirection: direction_enum = direction_enum.RIGHT;
+let maxSnakeLength: number = INITIAL_SNAKE_LENGTH;
+let snake: coordinate[] = INITIAL_SNAKE;
+let score: number = 0;
+let game: number;
+
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 let snakeColorGradient: CanvasGradient;
-let turnlength = 20;
-let maxSnakeLength: number = 14;
-let game: number;
-let mvmntDirection: direction_enum = direction_enum.RIGHT;
+let applePosition: coordinate[] = [];
 //#endregion
 
 //#endregion
@@ -44,14 +50,18 @@ window.onload = () => {
   snakeColorGradient.addColorStop(0.25, "#73e943");
   snakeColorGradient.addColorStop(0.75, "#73e943");
   snakeColorGradient.addColorStop(0.5, "#42801d");
+  renderBorder();
 };
 
 function doturn(): void {
   clearBoard();
   renderBorder();
-  document.onkeydown = changeDirection;
   renderSnake();
+  renderApples();
+  document.onkeydown = changeDirection;
   const newSegement: coordinate = increment(snake[0]);
+  checkAppleEaten(newSegement);
+  if (applePosition.length < MAX_NUMBER_APPLES) generateApple();
   if (detectCollision(newSegement)) {
     console.log("game Over");
     stop();
@@ -61,9 +71,11 @@ function doturn(): void {
   if (snake.length > maxSnakeLength) snake.pop();
 }
 function start() {
-  snake = initialsnake;
+  score = 0;
+  applePosition = [];
+  snake = INITIAL_SNAKE;
   mvmntDirection = direction_enum.RIGHT;
-  game = setInterval(doturn, turnlength);
+  game = setInterval(doturn, TICK_LENGTH_MS);
 }
 function stop() {
   clearInterval(game);
@@ -98,16 +110,34 @@ function detectCollision(newestSegement: coordinate): boolean {
     newestSegement.y <= 0
   );
 }
-
+function generateApple() {
+  let proposedCoordinate: coordinate = {
+    x: 5 + Math.floor(Math.random() * 190),
+    y: 5 + Math.floor(Math.random() * 190),
+  };
+  if (
+    !snake.find((p) => p == proposedCoordinate) &&
+    !applePosition.find((p) => p == proposedCoordinate)
+  )
+    applePosition.push(proposedCoordinate);
+}
+function checkAppleEaten(newSegement: coordinate) {
+  applePosition.forEach((p, index) => {
+    if (InEuclidDistance(p, newSegement, 2)) {
+      score++;
+      applePosition.splice(index, 1);
+      maxSnakeLength++;
+    }
+  });
+}
 function clearBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
-
-function renderBorder(){
-    ctx.rect(0,0,canvas.width, canvas.height);
-    ctx.strokeStyle = "black"
-    ctx.lineWidth = 1;
-    ctx.stroke();
+function renderBorder() {
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
+  ctx.stroke();
 }
 function renderSnake() {
   ctx.strokeStyle = snakeColorGradient;
@@ -120,5 +150,23 @@ function renderSnake() {
   snake.slice(1).forEach((point) => ctx?.lineTo(point.x, point.y));
   ctx.stroke();
 }
-
+function renderApples() {
+  applePosition.forEach((p) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 0.5, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.strokeStyle = "red";
+    ctx.fillStyle = "red";
+    ctx.fill();
+  });
+}
+function InEuclidDistance(
+  pointA: coordinate,
+  pointB: coordinate,
+  range: number
+) {
+  let distanceX = Math.pow(Math.abs(pointA.x - pointB.x), 2);
+  let distanceY = Math.pow(Math.abs(pointA.y - pointB.y), 2);
+  return range - Math.pow(distanceX + distanceY, 0.5) > 0;
+}
 //#endregion
