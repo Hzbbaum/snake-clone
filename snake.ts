@@ -10,15 +10,16 @@ interface coordinate {
   x: number;
   y: number;
 }
-const snake: coordinate[] = [
+const initialsnake = [
   { x: 33, y: 50 },
   { x: 32, y: 50 },
   { x: 31, y: 50 },
   { x: 30, y: 50 },
 ];
+let snake: coordinate[] = initialsnake;
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
-let snakeColorGradient:CanvasGradient;
+let snakeColorGradient: CanvasGradient;
 let turnlength = 20;
 let maxSnakeLength: number = 14;
 let game: number;
@@ -47,13 +48,21 @@ window.onload = () => {
 
 function doturn(): void {
   clearBoard();
+  renderBorder();
   document.onkeydown = changeDirection;
   renderSnake();
   const newSegement: coordinate = increment(snake[0]);
-  snake.unshift(newSegement);
+  if (detectCollision(newSegement)) {
+    console.log("game Over");
+    stop();
+  }
+
+  snake = [newSegement, ...snake];
   if (snake.length > maxSnakeLength) snake.pop();
 }
 function start() {
+  snake = initialsnake;
+  mvmntDirection = direction_enum.RIGHT;
   game = setInterval(doturn, turnlength);
 }
 function stop() {
@@ -74,16 +83,32 @@ function increment(coordinateToIncrement: coordinate): coordinate {
   }
 }
 function changeDirection(e: KeyboardEvent) {
-  if (e.keyCode in direction_enum) {
+  const ilegalDirection = 37 + ((mvmntDirection - 37 + 2) % 4);
+  if (e.keyCode in direction_enum && e.keyCode !== ilegalDirection) {
     mvmntDirection = e.keyCode;
     document.onkeydown = null;
   }
+}
+function detectCollision(newestSegement: coordinate): boolean {
+  return (
+    !!snake.find((p) => p === newestSegement) ||
+    newestSegement.x >= 200 ||
+    newestSegement.x <= 0 ||
+    newestSegement.y >= 200 ||
+    newestSegement.y <= 0
+  );
 }
 
 function clearBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+function renderBorder(){
+    ctx.rect(0,0,canvas.width, canvas.height);
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
 function renderSnake() {
   ctx.strokeStyle = snakeColorGradient;
   ctx.lineWidth = 2;
