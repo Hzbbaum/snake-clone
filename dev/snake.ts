@@ -1,4 +1,6 @@
 //#region constants
+import Score from "./scoreClass";
+let score: Score | null;
 enum direction_enum {
   UP = 38,
   DOWN = 40,
@@ -23,7 +25,7 @@ const MAX_NUMBER_APPLES = 3;
 let mvmntDirection: direction_enum = direction_enum.RIGHT;
 let maxSnakeLength: number = INITIAL_SNAKE_LENGTH;
 let snake: coordinate[] = INITIAL_SNAKE;
-let score: number = 0;
+// let score: number = 0;
 let game: number;
 
 let canvas: HTMLCanvasElement;
@@ -32,10 +34,12 @@ let snakeColorGradient: CanvasGradient;
 let applePosition: coordinate[] = [];
 //#endregion
 
-//#endregion
-
+//#region setup
 window.onload = () => {
+  (document.querySelector("#startButton") as HTMLButtonElement).addEventListener("click", start);
+  (document.querySelector("#stopButton") as HTMLButtonElement).addEventListener("click", stop);
   canvas = document.querySelector("#game") as HTMLCanvasElement;
+  score = new Score(document.querySelector("#scoreBox") as HTMLDataElement);
   try {
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   } catch (error) {
@@ -52,7 +56,8 @@ window.onload = () => {
   snakeColorGradient.addColorStop(0.5, "#42801d");
   renderBorder();
 };
-
+//#endregion
+//#region game logic
 function doturn(): void {
   clearBoard();
   renderBorder();
@@ -71,7 +76,7 @@ function doturn(): void {
   if (snake.length > maxSnakeLength) snake.pop();
 }
 function start() {
-  score = 0;
+  // score = 0;
   applePosition = [];
   snake = INITIAL_SNAKE;
   maxSnakeLength = INITIAL_SNAKE_LENGTH;
@@ -125,7 +130,7 @@ function generateApple() {
 function checkAppleEaten(newSegement: coordinate) {
   applePosition.forEach((p, index) => {
     if (InEuclidDistance(p, newSegement, 2)) {
-      score++;
+      score?.increment(1);
       applePosition.splice(index, 1);
       maxSnakeLength++;
     }
@@ -134,6 +139,8 @@ function checkAppleEaten(newSegement: coordinate) {
 function clearBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
+//#endregion
+//#region render function
 function renderBorder() {
   ctx.rect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "black";
@@ -161,6 +168,8 @@ function renderApples() {
     ctx.fill();
   });
 }
+//#endregion
+//#region helper functions
 function InEuclidDistance(
   pointA: coordinate,
   pointB: coordinate,
@@ -171,3 +180,4 @@ function InEuclidDistance(
   return range - Math.pow(distanceX + distanceY, 0.5) > 0;
 }
 //#endregion
+console.log("hi")

@@ -1,0 +1,33 @@
+{
+  "name": "snake-clone",
+  "version": "1.0.0",
+  "description": "a snake game clone",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "ts-loader": "^7.0.5",
+    "typescript": "^3.9.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "test": "echo \"Eror: no test specified\" && exit 1",
+    "build:": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hzbbaum/snake-clone.git"
+  },
+  "keywords": [
+    "snake",
+    "game",
+    "ts",
+    "canvas"
+  ],
+  "author": "Hillel Buchsbaum",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hzbbaum/snake-clone/issues"
+  },
+  "homepage": "https://github.com/Hzbbaum/snake-clone#readme"
+}
