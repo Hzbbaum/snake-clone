@@ -1,6 +1,10 @@
 //#region constants
 import Score from "./scoreClass";
 let score: Score | null;
+const isTouch: boolean =
+  "ontouchstart" in window ||
+  navigator.maxTouchPoints > 0 ||
+  navigator.msMaxTouchPoints > 0;
 enum direction_enum {
   UP = 38,
   DOWN = 40,
@@ -12,6 +16,8 @@ interface coordinate {
   x: number;
   y: number;
 }
+const screenWidth = window.screen.width;
+const screenHeight = window.screen.height;
 const INITIAL_SNAKE = [
   { x: 33, y: 50 },
   { x: 32, y: 50 },
@@ -36,8 +42,13 @@ let applePosition: coordinate[] = [];
 
 //#region setup
 window.onload = () => {
-  (document.querySelector("#startButton") as HTMLButtonElement).addEventListener("click", start);
-  (document.querySelector("#stopButton") as HTMLButtonElement).addEventListener("click", stop);
+  (document.querySelector(
+    "#startButton"
+  ) as HTMLButtonElement).addEventListener("click", start);
+  (document.querySelector("#stopButton") as HTMLButtonElement).addEventListener(
+    "click",
+    stop
+  );
   canvas = document.querySelector("#game") as HTMLCanvasElement;
   score = new Score(document.querySelector("#scoreBox") as HTMLDataElement);
   try {
@@ -63,12 +74,12 @@ function doturn(): void {
   renderBorder();
   renderSnake();
   renderApples();
-  document.onkeydown = changeDirection;
+  if (isTouch) window.ontouchstart = changeDirectionTouchScreen;
+  else document.onkeydown = changeDirection;
   const newSegement: coordinate = increment(snake[0]);
   checkAppleEaten(newSegement);
   if (applePosition.length < MAX_NUMBER_APPLES) generateApple();
   if (detectCollision(newSegement)) {
-    console.log("game Over");
     stop();
   }
 
@@ -76,7 +87,7 @@ function doturn(): void {
   if (snake.length > maxSnakeLength) snake.pop();
 }
 function start() {
-  // score = 0;
+  score.reset();
   applePosition = [];
   snake = INITIAL_SNAKE;
   maxSnakeLength = INITIAL_SNAKE_LENGTH;
@@ -106,6 +117,29 @@ function changeDirection(e: KeyboardEvent) {
     mvmntDirection = e.keyCode;
     document.onkeydown = null;
   }
+}
+function changeDirectionTouchScreen(e: TouchEvent) {
+  const movingHorizontal: boolean =
+    mvmntDirection == direction_enum.LEFT ||
+    mvmntDirection == direction_enum.RIGHT;
+  console.log(
+    e.touches[0].clientX,
+    e.touches[0].clientX,
+    movingHorizontal ? "horizontal" : "vertical"
+  );
+  if (!movingHorizontal) {
+    if (e.touches[0].clientX < screenWidth / 3)
+      mvmntDirection = direction_enum.LEFT;
+    if (e.touches[0].clientX > (screenWidth * 2) / 3)
+      mvmntDirection = direction_enum.RIGHT;
+  } else {
+    if (e.touches[0].clientY < screenHeight / 3)
+      mvmntDirection = direction_enum.UP;
+    if (e.touches[0].clientY > (screenHeight * 2) / 3)
+      mvmntDirection = direction_enum.DOWN;
+  }
+
+  console.log(direction_enum[mvmntDirection]);
 }
 function detectCollision(newestSegement: coordinate): boolean {
   return (
@@ -180,4 +214,3 @@ function InEuclidDistance(
   return range - Math.pow(distanceX + distanceY, 0.5) > 0;
 }
 //#endregion
-console.log("hi")
