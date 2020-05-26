@@ -18,6 +18,9 @@ interface coordinate {
 }
 const screenWidth = window.screen.width;
 const screenHeight = window.screen.height;
+
+const CANVAS_WIDTH: number = 200;
+const CANVAS_HEIGHT: number = 200;
 const INITIAL_SNAKE = [
   { x: 33, y: 50 },
   { x: 32, y: 50 },
@@ -74,7 +77,7 @@ function doturn(): void {
   renderBorder();
   renderSnake();
   renderApples();
-  if (isTouch) window.ontouchstart = changeDirectionTouchScreen;
+  if (isTouch) canvas.ontouchstart = changeDirectionTouchScreen;
   else document.onkeydown = changeDirection;
   const newSegement: coordinate = increment(snake[0]);
   checkAppleEaten(newSegement);
@@ -119,27 +122,29 @@ function changeDirection(e: KeyboardEvent) {
   }
 }
 function changeDirectionTouchScreen(e: TouchEvent) {
+  let canvasRect = canvas.getBoundingClientRect();
+  let relativeclick: coordinate = {
+    x: e.touches[0].clientX - canvasRect.x,
+    y: e.touches[0].clientY - canvasRect.y,
+  };
+  let snakePixelPosition = {
+    x: (canvasRect.width * snake[snake.length - 1].x) / CANVAS_WIDTH,
+    y: (canvasRect.height * snake[snake.length - 1].y) / CANVAS_HEIGHT,
+  };
   const movingHorizontal: boolean =
     mvmntDirection == direction_enum.LEFT ||
     mvmntDirection == direction_enum.RIGHT;
-  console.log(
-    e.touches[0].clientX,
-    e.touches[0].clientX,
-    movingHorizontal ? "horizontal" : "vertical"
-  );
   if (!movingHorizontal) {
-    if (e.touches[0].clientX < screenWidth / 3)
-      mvmntDirection = direction_enum.LEFT;
-    if (e.touches[0].clientX > (screenWidth * 2) / 3)
-      mvmntDirection = direction_enum.RIGHT;
+    mvmntDirection =
+      relativeclick.x < snakePixelPosition.x
+        ? direction_enum.LEFT
+        : direction_enum.RIGHT;
   } else {
-    if (e.touches[0].clientY < screenHeight / 3)
-      mvmntDirection = direction_enum.UP;
-    if (e.touches[0].clientY > (screenHeight * 2) / 3)
-      mvmntDirection = direction_enum.DOWN;
+    mvmntDirection =
+      relativeclick.y < snakePixelPosition.y
+        ? direction_enum.UP
+        : direction_enum.DOWN;
   }
-
-  console.log(direction_enum[mvmntDirection]);
 }
 function detectCollision(newestSegement: coordinate): boolean {
   return (
