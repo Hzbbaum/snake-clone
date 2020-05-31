@@ -200,10 +200,10 @@ function renderSnake() {
 function renderApples() {
   applePosition.forEach((p) => {
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 0.5, 0, 2 * Math.PI);
-    ctx.stroke();
     ctx.strokeStyle = "red";
     ctx.fillStyle = "red";
+    ctx.arc(p.x, p.y, 0.5, 0, 2 * Math.PI);
+    ctx.stroke();
     ctx.fill();
   });
 }
