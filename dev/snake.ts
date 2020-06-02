@@ -148,7 +148,17 @@ function changeDirectionTouchScreen(e: TouchEvent) {
 }
 function detectCollision(newestSegement: coordinate): boolean {
   return (
-    !!snake.find((p) => p === newestSegement) ||
+    detectCollisionSelf(newestSegement) ||
+    detectCollisionBorders(newestSegement)
+  );
+}
+function detectCollisionSelf(newestSegement: coordinate): boolean {
+  return !!snake.find(
+    (p) => p.y == newestSegement.y && p.x == newestSegement.x
+  );
+}
+function detectCollisionBorders(newestSegement: coordinate): boolean {
+  return (
     newestSegement.x >= 200 ||
     newestSegement.x <= 0 ||
     newestSegement.y >= 200 ||
